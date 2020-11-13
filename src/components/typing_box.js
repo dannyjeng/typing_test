@@ -4,6 +4,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import { FaRedoAlt } from 'react-icons/fa';
+import secondsToTime from './convert_seconds_to_time';
 
 import './typing_box.css';
 
@@ -20,27 +21,8 @@ class TypingBox extends Component {
     }
 
     componentDidMount() {
-        let timeLeft = this.secondsToTime(this.seconds); // to convert the seconds to time
+        let timeLeft = secondsToTime(this.seconds); // to convert the seconds to time
         this.setState({ time: timeLeft });
-    }
-
-    secondsToTime(s) {
-        let divisor_for_minutes = s % (60*60);
-        let minutes = Math.floor(divisor_for_minutes / 60);
-
-        let divisor_for_seconds = divisor_for_minutes % 60;
-        let seconds = Math.ceil(divisor_for_seconds);
-
-        if (seconds < 10) {
-            seconds = '0' + seconds; // For padding the seconds.
-        }
-
-        let obj = {
-            'm': minutes,
-            's': seconds,
-        };
-
-        return obj;
     }
 
     startTimer = () => {
@@ -52,7 +34,7 @@ class TypingBox extends Component {
     countDown = () => {
         this.seconds_elapsed = this.seconds_elapsed + 1
         this.setState({
-            time: this.secondsToTime(this.seconds - this.seconds_elapsed),
+            time: secondsToTime(this.seconds - this.seconds_elapsed),
         });
 
         if (this.seconds === this.seconds_elapsed) {
@@ -63,7 +45,7 @@ class TypingBox extends Component {
     resetTimer = () => {
         this.setState({ 
             word: '',
-            time: this.secondsToTime(this.seconds),
+            time: secondsToTime(this.seconds),
         });
         this.seconds_elapsed = 0;
         document.getElementById('form').focus();
