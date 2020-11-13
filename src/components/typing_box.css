@@ -5,3 +5,22 @@
     margin-right: -50%;
     transform: translate(-50%, -50%);
 }
+
+.mainBody {
+}
+
+.form-control {
+    //top: 50px;
+    //left: 50px;
+}
+
+.form-control:focus {
+    //background-color: yellow !important;
+    box-shadow: none !important; /* removes the outline */
+    border-color: grey !important;
+}
+
+.custom-btn {
+    background-color: grey !important; /* !important needed to override react-bootstrap style */
+    border-color: grey !important; 
+}

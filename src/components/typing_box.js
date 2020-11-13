@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import Container from 'react-bootstrap/Container';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
-import Card from 'react-bootstrap/Card';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
+import { FaRedoAlt } from 'react-icons/fa';
 
 import './typing_box.css';
 
@@ -18,10 +16,11 @@ class TypingBox extends Component {
         };
         this.timer = 0;
         this.seconds = 60; // The starting time on the clock.
+        this.seconds_elapsed = 0;
     }
 
     componentDidMount() {
-        let timeLeft = this.secondsToTime(this.seconds);
+        let timeLeft = this.secondsToTime(this.seconds); // to convert the seconds to time
         this.setState({ time: timeLeft });
     }
 
@@ -51,14 +50,25 @@ class TypingBox extends Component {
     }
 
     countDown = () => {
-        this.seconds = this.seconds - 1;
+        this.seconds_elapsed = this.seconds_elapsed + 1
         this.setState({
-            time: this.secondsToTime(this.seconds),
+            time: this.secondsToTime(this.seconds - this.seconds_elapsed),
         });
 
-        if (this.seconds === 0) {
+        if (this.seconds === this.seconds_elapsed) {
             clearInterval(this.timer); // To stop setInterval() from going into the negatives.
         }
+    }
+
+    resetTimer = () => {
+        this.setState({ 
+            word: '',
+            time: this.secondsToTime(this.seconds),
+        });
+        this.seconds_elapsed = 0;
+        document.getElementById('form').focus();
+        clearInterval(this.timer);
+        this.timer = 0; // clearInterval doesn't reset this.timer to 0
     }
 
     onWordChange = (event) => {
@@ -78,35 +88,61 @@ class TypingBox extends Component {
             **/
             //event.preventDefault() 
             this.setState({ word: '' })
+        } else if (
+            /* 
+            Other punctuation keyCodes seem to be inconsistent across OS and browsers.
+            So I'll only check for  numbers, alpha keys, comma, period, and other characters that
+            share those keys, such as in the case of Shift modified events. I.e. 1 and ! share the
+            keyCode.
+            For other keyCodes, see: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+            */
+            (event.keyCode >= 48 && event.keyCode <= 57) || // numeric and shift modified(0-9)
+            (event.keyCode >= 65 && event.keyCode <= 90) || // upper and lower case alpha (A-Z)
+            (event.keyCode === 188) || // comma 
+            (event.keyCode === 190) // period
+        )   {
+            //console.log(event.target.value)
+            if (this.timer === 0) {
+                this.startTimer()
+            }
         }
     }
 
     render() {
         return (
             <Container>
-                <Button onClick={this.startTimer}>{this.state.time.m}:{this.state.time.s}</Button>
-                <Card>
-                    <Card.Body>
-                        <Card.Text>
-                            Sample text
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
-                
-                {/**
-                    Put a refresh symbol next to the input text box.
-                    Start timer countdown when this.state.word is not empty.
-                **/}
+                {/*<Button className='custom-btn' onClick={this.startTimer}>{this.state.time.m}:{this.state.time.s}</Button>*/}
+                <h1>Sample text </h1>
 
-                <InputGroup onKeyUp={this.handleKeyUp}>
+                <InputGroup 
+                    className="mainBody" 
+                    onKeyUp={this.handleKeyUp}
+                >
+                    <InputGroup.Prepend>
+                        <Button 
+                            className="custom-btn"
+                            onClick={this.resetTimer}
+                        >
+                            <FaRedoAlt />
+                        </Button>
+                    </InputGroup.Prepend>
+                    
                     <FormControl 
-                    type='text'
-                    placeholder='Type here...'
-                    size='lg'
-                    autoFocus={true}
-                    value={this.state.word}
-                    onChange={this.onWordChange}
+                        id='form'
+                        type='text'
+                        placeholder='Type here...'
+                        size='lg'
+                        autoFocus={true}
+                        value={this.state.word}
+                        onChange={this.onWordChange}
                     />
+
+                    <InputGroup.Append>
+                        <InputGroup.Text>
+                            {this.state.time.m}:{this.state.time.s}
+                        </InputGroup.Text>
+                    </InputGroup.Append>
+
                 </InputGroup>
             </Container>
         )
