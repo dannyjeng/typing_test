@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-
 const secondsToTime = (s) => {
     let divisor_for_minutes = s % (60*60);
     let minutes = Math.floor(divisor_for_minutes / 60);

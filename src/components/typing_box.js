@@ -5,8 +5,13 @@ import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import { FaRedoAlt } from 'react-icons/fa';
 import secondsToTime from './convert_seconds_to_time';
+import generate from './words';
 
 import './typing_box.css';
+
+// Disconnect timer from wpm; for wpm use what that site does
+// The timer countdown component can just return the time...actually lets deal with that last
+// Change everything else first to get the typing and wpm working, then connect the timer
 
 class TypingBox extends Component {
     constructor(props) {
@@ -81,7 +86,7 @@ class TypingBox extends Component {
             (event.keyCode >= 48 && event.keyCode <= 57) || // numeric and shift modified(0-9)
             (event.keyCode >= 65 && event.keyCode <= 90) || // upper and lower case alpha (A-Z)
             (event.keyCode === 188) || // comma 
-            (event.keyCode === 190) // period
+            (event.keyCode >= 190 && event.keyCode <= 191) // period and question mark
         )   {
             //console.log(event.target.value)
             if (this.timer === 0) {
