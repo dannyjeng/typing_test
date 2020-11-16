@@ -11,7 +11,7 @@ const useKeyPress = (callback) => {
         const downHandler = ({ key }) => {
             if (keyPressed !== key && key.length === 1) {
                 setKeyPressed(key);
-                callback(key);
+                callback && callback(key);
             }
         };
 

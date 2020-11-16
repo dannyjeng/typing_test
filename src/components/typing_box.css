@@ -1,26 +1,22 @@
-.container {
+.Character {
+    white-space: pre;
+}
+
+.Character-current {
+    text-decoration: underline;
+}
+
+.Character-out {
+    color:silver;
+}
+
+.mainBody {
     position: absolute;
     top: 50%;
     left: 50%;
     margin-right: -50%;
     transform: translate(-50%, -50%);
+    text-align: center;
+    font-family: monospace;
 }
 
-.mainBody {
-}
-
-.form-control {
-    //top: 50px;
-    //left: 50px;
-}
-
-.form-control:focus {
-    //background-color: yellow !important;
-    box-shadow: none !important; /* removes the outline */
-    border-color: grey !important;
-}
-
-.custom-btn {
-    background-color: grey !important; /* !important needed to override react-bootstrap style */
-    border-color: grey !important; 
-}

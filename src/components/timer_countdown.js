@@ -1,38 +1,64 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import secondsToTime from './convert_seconds_to_time';
+import { Button } from 'react-bootstrap';
+import {FaRedoAlt } from 'react-icons/fa';
 
-const countdownTimer = (event) => {
+/*
+Using:
+https://stackoverflow.com/questions/57137094/implementing-a-countdown-timer-in-react-with-hooks
 
-    const startTime = 60;
-    const [currentTime, setCurrentTime] = useState(startTime);
-    const [secondsElapsed, setSecondsElapsed] = useState(0);
-    const [timer, setTimer] = useState(0);
+After this component mounts, useEffect gets called and the state of timeLeft changes. 
+React then re-renders the component because the state changed, and useEffect is called again. 
+This continues until, in this case, it reaches the exit statement.
+
+This answer provides a good explanation of how React handles useEffect:
+https://stackoverflow.com/questions/56599583/useeffect-hook-example-what-causes-the-re-render
+*/
+
+const CountdownTimer = (trigger, seconds) => {
+
+    const [timeLeft, setTimeLeft] = useState(seconds);
+    const [timerOn, setTimerOn] = useState(false);
+    const displayTime = secondsToTime(timeLeft);
+
+    const resetTimer = () => {
+        setTimeLeft(seconds);
+        setTimerOn(false);
+    }
 
     useEffect(() => {
-
-        const startTimer = () => {
-            if (timer === 0 && currentTime > 0) {
-                setTimer(setInterval(countDown, 1000));
-            }
+        if (trigger) {
+            setTimerOn(true);
         }
+    }, [trigger]);
 
-        const countDown = () => {
-            setSecondsElapsed(secondsElapsed + 1);
-            setCurrentTime(currentTime - secondsElapsed);
-            if (currentTime === 0) {
-                clearInterval(timer)
-            }
+    // useEffect runs after every render
+    // Same as componentDidUpdate in class components
+    useEffect(() => {
+        // Exit when timeLeft is 0
+        if (!timeLeft) return;
+
+        if (timerOn) {
+            // Generate a new intervalId for each re-render
+            const intervalId = setInterval(() => {
+                setTimeLeft(timeLeft - 1);
+            }, 1000);
+
+            // Clear interval on re-render to avoid memory leaks
+            // See: https://reactjs.org/docs/hooks-reference.html#cleaning-up-an-effect
+            return () => clearInterval(intervalId);
+            // Add timeLeft as a dependecy to re-run the effect when we update it
         }
+    }, [timeLeft, timerOn]);
 
-        const resetTimer = () => {
-            setCurrentTime(startTime);
-            setSecondsElapsed(0);
-            clearInterval(timer);
-            setTimer(0);
-        }
-    });
+    return (
+        <div className='Timer'>
+            <Button onClick={() => resetTimer()}>
+                <FaRedoAlt/>
+            </Button>
+            <h1>{displayTime.m}:{displayTime.s}</h1>
+        </div>
+    );
+};
 
-    return 
-}
-
-export default countdownTimer;
+export default CountdownTimer;

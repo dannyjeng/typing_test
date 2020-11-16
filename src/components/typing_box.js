@@ -1,139 +1,162 @@
-import React, { Component } from 'react';
-import Container from 'react-bootstrap/Container';
-import InputGroup from 'react-bootstrap/InputGroup';
-import FormControl from 'react-bootstrap/FormControl';
-import Button from 'react-bootstrap/Button';
+import React, { useState, useEffect } from 'react';
+import generate from './words';
+import useKeyPress from './useKeyPress';
+import { currentTime } from '../utils/time';
+import { Button } from 'react-bootstrap';
 import { FaRedoAlt } from 'react-icons/fa';
 import secondsToTime from './convert_seconds_to_time';
-import generate from './words';
 
 import './typing_box.css';
 
-// Disconnect timer from wpm; for wpm use what that site does
-// The timer countdown component can just return the time...actually lets deal with that last
-// Change everything else first to get the typing and wpm working, then connect the timer
+// Tutorial taken from:
+// https://medium.com/better-programming/create-a-typing-game-with-react-hooks-usekeypress-and-faker-28bbc7919820 
+// TODO: Add timer, limit words to 4 letter, 5 letter, etc., track top results in a database
 
-class TypingBox extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            word: '',
-            time: {},
-        };
-        this.timer = 0;
-        this.seconds = 60; // The starting time on the clock.
-        this.seconds_elapsed = 0;
-    }
+const initialWords = generate();
 
-    componentDidMount() {
-        let timeLeft = secondsToTime(this.seconds); // to convert the seconds to time
-        this.setState({ time: timeLeft });
-    }
+const initialStates = [{
+    leftPadding :  new Array(20).fill(' ').join(''),
+    outgoingChars : '',
+    currentChar : initialWords.charAt(0),
+    incomingChars : initialWords.substr(1),
+    startTime : 0,
+    wordCount : 0,
+    wpm : 0,
+    accuracy : 0,
+    typedChars : 0,
+    countdownTime : 60,
+}];
 
-    startTimer = () => {
-        if (this.timer === 0 && this.seconds > 0) {
-            this.timer = setInterval(this.countDown, 1000);
+const TypingBox = () => {
+
+    const [leftPadding, setLeftPadding] = useState(
+        new Array(20).fill(' ').join(''),
+    );
+
+    const [outgoingChars, setOutgoingChars] = useState('');
+    const [currentChar, setCurrentChar] = useState(initialWords.charAt(0));
+    const [incomingChars, setIncomingChars] = useState(initialWords.substr(1));
+
+    const [startTime, setStartTime] = useState();
+    const [wordCount, setWordCount] = useState(0);
+    const [wpm, setWpm] = useState(0);
+
+    const [accuracy, setAccuracy] = useState(0);
+    const [typedChars, setTypedChars] = useState('');
+
+    const [countdownTime, setCountdownTime] = useState(60);
+
+    // Copied in from './timer_countdown.js' because too many state changes needed.
+    // Unsure how to deal with these...TODO: learn Redux to deal with this?
+    const CountdownTimer = (trigger, seconds) => {
+
+        const [timeLeft, setTimeLeft] = useState(seconds);
+        const [timerOn, setTimerOn] = useState(false);
+        const displayTime = secondsToTime(timeLeft);
+
+        const resetTimer = () => {
+            setTimeLeft(seconds);
+            setTimerOn(false);
+            setWpm(0);
+            setAccuracy(0);
         }
-    }
 
-    countDown = () => {
-        this.seconds_elapsed = this.seconds_elapsed + 1
-        this.setState({
-            time: secondsToTime(this.seconds - this.seconds_elapsed),
-        });
-
-        if (this.seconds === this.seconds_elapsed) {
-            clearInterval(this.timer); // To stop setInterval() from going into the negatives.
-        }
-    }
-
-    resetTimer = () => {
-        this.setState({ 
-            word: '',
-            time: secondsToTime(this.seconds),
-        });
-        this.seconds_elapsed = 0;
-        document.getElementById('form').focus();
-        clearInterval(this.timer);
-        this.timer = 0; // clearInterval doesn't reset this.timer to 0
-    }
-
-    onWordChange = (event) => {
-        this.setState({ word: event.target.value });
-    }
-
-    handleKeyUp = (event) => {
-        if (event.keyCode === 13 || event.keyCode === 32) {
-            /**
-            Use event.preventDefault() if doing onKeyDown instead of onKeyUp.
-
-            The preventDefault() use is most apparent when missing. If you press space to set the 
-            value of the InputGroup back to an empty string, you will notice an extra space appear
-            in that InputGroup. 
-            event.preventDefault() stops that space key from also registering as a normal space, 
-            which is desirable in this case since we only want to deal with one word at a time.
-            **/
-            //event.preventDefault() 
-            this.setState({ word: '' })
-        } else if (
-            /* 
-            Other punctuation keyCodes seem to be inconsistent across OS and browsers.
-            So I'll only check for  numbers, alpha keys, comma, period, and other characters that
-            share those keys, such as in the case of Shift modified events. I.e. 1 and ! share the
-            keyCode.
-            For other keyCodes, see: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-            */
-            (event.keyCode >= 48 && event.keyCode <= 57) || // numeric and shift modified(0-9)
-            (event.keyCode >= 65 && event.keyCode <= 90) || // upper and lower case alpha (A-Z)
-            (event.keyCode === 188) || // comma 
-            (event.keyCode >= 190 && event.keyCode <= 191) // period and question mark
-        )   {
-            //console.log(event.target.value)
-            if (this.timer === 0) {
-                this.startTimer()
+        useEffect(() => {
+            if (trigger) {
+                setTimerOn(true);
             }
-        }
-    }
+        }, [trigger]);
 
-    render() {
+        // useEffect runs after every render
+        // Same as componentDidUpdate in class components
+        useEffect(() => {
+            // Exit when timeLeft is 0
+            if (!timeLeft) return;
+
+            if (timerOn) {
+                // Generate a new intervalId for each re-render
+                const intervalId = setInterval(() => {
+                    setTimeLeft(timeLeft - 1);
+                }, 1000);
+
+                // Clear interval on re-render to avoid memory leaks
+                // See: https://reactjs.org/docs/hooks-reference.html#cleaning-up-an-effect
+                return () => clearInterval(intervalId);
+                // Add timeLeft as a dependecy to re-run the effect when we update it
+            }
+        }, [timeLeft, timerOn]);
+
         return (
-            <Container>
-                {/*<Button className='custom-btn' onClick={this.startTimer}>{this.state.time.m}:{this.state.time.s}</Button>*/}
-                <h1>Sample text </h1>
+            <div className='Timer'>
+                <Button onClick={() => resetTimer()}>
+                    <FaRedoAlt/>
+                </Button>
+                <h1>{displayTime.m}:{displayTime.s}</h1>
+            </div>
+        );
+    };
 
-                <InputGroup 
-                    className="mainBody" 
-                    onKeyUp={this.handleKeyUp}
-                >
-                    <InputGroup.Prepend>
-                        <Button 
-                            className="custom-btn"
-                            onClick={this.resetTimer}
-                        >
-                            <FaRedoAlt />
-                        </Button>
-                    </InputGroup.Prepend>
-                    
-                    <FormControl 
-                        id='form'
-                        type='text'
-                        placeholder='Type here...'
-                        size='lg'
-                        autoFocus={true}
-                        value={this.state.word}
-                        onChange={this.onWordChange}
-                    />
+    return(
+        useKeyPress((key) => {
 
-                    <InputGroup.Append>
-                        <InputGroup.Text>
-                            {this.state.time.m}:{this.state.time.s}
-                        </InputGroup.Text>
-                    </InputGroup.Append>
+            if (!startTime) {
+                setStartTime(currentTime());
+            }
 
-                </InputGroup>
-            </Container>
-        )
-    }
+            let updatedOutgoingChars = outgoingChars;
+            let updatedIncomingChars = incomingChars;
+
+            if (key === currentChar) {
+
+                if (leftPadding.length > 0) {
+                    setLeftPadding(leftPadding.substring(1));
+                }
+
+                updatedOutgoingChars += currentChar
+                setOutgoingChars(updatedOutgoingChars);
+
+                setCurrentChar(incomingChars.charAt(0));
+
+                updatedIncomingChars = incomingChars.substring(1);
+                if (updatedIncomingChars.split(' ').length < 10) {
+                    updatedIncomingChars +=' ' + generate();
+                }
+
+                setIncomingChars(updatedIncomingChars);
+
+                if (incomingChars.charAt(0) === ' ') {
+                    setWordCount(wordCount + 1)
+                    const durationInMinutes = (currentTime() - startTime) / 60000.0; // currentTime() returns in milliseconds
+                    setWpm(((wordCount + 1) / durationInMinutes).toFixed(2)); // Without +1, wpm is 0 after first word. Didn't update wordCount?
+                }
+            };
+
+            // Calculating accuracy. It's the number of correctly typed keys divided by total number of keys typed in.
+            const updatedTypedChars = typedChars + key; // Storing all typed keys in a string
+            setTypedChars(updatedTypedChars);
+            setAccuracy(
+                (100 * (updatedOutgoingChars.length) / updatedTypedChars.length).toFixed(2)
+            );
+        }),
+
+        <div className='mainBody'>
+            {CountdownTimer(typedChars, countdownTime)}
+            <p className='Character'>
+                <span className='Character-out'>
+                    {(leftPadding + outgoingChars).slice(-20)}
+                </span>
+                <span className='Character-current'>
+                    {currentChar}
+                </span>
+                <span>
+                    {incomingChars.substr(0, 20)}
+                </span>
+            </p>
+            <h3>
+                WPM: {wpm} | ACC: {accuracy}%
+            </h3>
+        </div>
+    );
 }
 
-export default TypingBox
+export default TypingBox;
