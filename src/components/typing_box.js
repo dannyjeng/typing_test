@@ -14,19 +14,6 @@ import './typing_box.css';
 
 const initialWords = generate();
 
-const initialStates = [{
-    leftPadding :  new Array(20).fill(' ').join(''),
-    outgoingChars : '',
-    currentChar : initialWords.charAt(0),
-    incomingChars : initialWords.substr(1),
-    startTime : 0,
-    wordCount : 0,
-    wpm : 0,
-    accuracy : 0,
-    typedChars : 0,
-    countdownTime : 60,
-}];
-
 const TypingBox = () => {
 
     const [leftPadding, setLeftPadding] = useState(
@@ -55,10 +42,18 @@ const TypingBox = () => {
         const displayTime = secondsToTime(timeLeft);
 
         const resetTimer = () => {
-            setTimeLeft(seconds);
-            setTimerOn(false);
+            const resetWords = generate()
+            setOutgoingChars('');
+            setCurrentChar(resetWords.charAt(0));
+            setIncomingChars(resetWords.substr(1));
+            setStartTime();
+            setWordCount();
             setWpm(0);
             setAccuracy(0);
+            setTypedChars('');
+            setCountdownTime(60);
+            setTimeLeft(seconds);
+            setTimerOn(false);
         }
 
         useEffect(() => {
@@ -86,15 +81,10 @@ const TypingBox = () => {
             }
         }, [timeLeft, timerOn]);
 
-        return (
-            <div className='Timer'>
-                <Button onClick={() => resetTimer()}>
-                    <FaRedoAlt/>
-                </Button>
-                <h1>{displayTime.m}:{displayTime.s}</h1>
-            </div>
-        );
+        return ([displayTime.m, displayTime.s]);
     };
+
+    const [m, s] = CountdownTimer(typedChars, countdownTime);
 
     return(
         useKeyPress((key) => {
@@ -140,7 +130,6 @@ const TypingBox = () => {
         }),
 
         <div className='mainBody'>
-            {CountdownTimer(typedChars, countdownTime)}
             <p className='Character'>
                 <span className='Character-out'>
                     {(leftPadding + outgoingChars).slice(-20)}
@@ -152,6 +141,12 @@ const TypingBox = () => {
                     {incomingChars.substr(0, 20)}
                 </span>
             </p>
+            <h3>
+                {m}:{s}
+                {/*<Button variant="outline-dark" onClick={() => resetTimer()}>
+                    <FaRedoAlt/>
+                </Button>*/}
+            </h3>
             <h3>
                 WPM: {wpm} | ACC: {accuracy}%
             </h3>
