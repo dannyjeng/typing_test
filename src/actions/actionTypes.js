@@ -1,0 +1,2 @@
+export const RESET_TIMER = 'RESET_TIMER';
+export const DECREMENT_TIMER = 'DECREMENT_TIMER';

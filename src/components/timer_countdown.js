@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import secondsToTime from './convert_seconds_to_time';
-import { Button } from 'react-bootstrap';
-import {FaRedoAlt } from 'react-icons/fa';
+
+import { useDispatch } from 'react-redux';
 
 /*
 Using:
@@ -16,15 +16,11 @@ https://stackoverflow.com/questions/56599583/useeffect-hook-example-what-causes-
 */
 
 const CountdownTimer = (trigger, seconds) => {
+    const dispatch = useDispatch();
 
-    const [timeLeft, setTimeLeft] = useState(seconds);
+    //const [timeLeft, setTimeLeft] = useState(seconds);
     const [timerOn, setTimerOn] = useState(false);
-    const displayTime = secondsToTime(timeLeft);
-
-    const resetTimer = () => {
-        setTimeLeft(seconds);
-        setTimerOn(false);
-    }
+    //const displayTime = secondsToTime(timeLeft);
 
     useEffect(() => {
         if (trigger) {
@@ -36,12 +32,13 @@ const CountdownTimer = (trigger, seconds) => {
     // Same as componentDidUpdate in class components
     useEffect(() => {
         // Exit when timeLeft is 0
-        if (!timeLeft) return;
+        //if (!seconds) return;
 
         if (timerOn) {
             // Generate a new intervalId for each re-render
             const intervalId = setInterval(() => {
-                setTimeLeft(timeLeft - 1);
+                //setTimeLeft(timeLeft - 1);
+                dispatch({ type: 'DECREMENT_TIMER' })
             }, 1000);
 
             // Clear interval on re-render to avoid memory leaks
@@ -49,16 +46,7 @@ const CountdownTimer = (trigger, seconds) => {
             return () => clearInterval(intervalId);
             // Add timeLeft as a dependecy to re-run the effect when we update it
         }
-    }, [timeLeft, timerOn]);
-
-    return (
-        <div className='Timer'>
-            <Button onClick={() => resetTimer()}>
-                <FaRedoAlt/>
-            </Button>
-            <h1>{displayTime.m}:{displayTime.s}</h1>
-        </div>
-    );
+    }, [timerOn]);
 };
 
 export default CountdownTimer;

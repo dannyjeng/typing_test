@@ -5,6 +5,9 @@ import { currentTime } from '../utils/time';
 import { Button } from 'react-bootstrap';
 import { FaRedoAlt } from 'react-icons/fa';
 import secondsToTime from './convert_seconds_to_time';
+import CountdownTimer from './timer_countdown';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 import './typing_box.css';
 
@@ -15,6 +18,7 @@ import './typing_box.css';
 const initialWords = generate();
 
 const TypingBox = () => {
+    const dispatch = useDispatch();
 
     const [leftPadding, setLeftPadding] = useState(
         new Array(20).fill(' ').join(''),
@@ -31,61 +35,12 @@ const TypingBox = () => {
     const [accuracy, setAccuracy] = useState(0);
     const [typedChars, setTypedChars] = useState('');
 
-    const [countdownTime, setCountdownTime] = useState(60);
+    //const [countdownTime, setCountdownTime] = useState(60);
 
-    // Copied in from './timer_countdown.js' because too many state changes needed.
-    // Unsure how to deal with these...TODO: learn Redux to deal with this?
-    const CountdownTimer = (trigger, seconds) => {
-
-        const [timeLeft, setTimeLeft] = useState(seconds);
-        const [timerOn, setTimerOn] = useState(false);
-        const displayTime = secondsToTime(timeLeft);
-
-        const resetTimer = () => {
-            const resetWords = generate()
-            setOutgoingChars('');
-            setCurrentChar(resetWords.charAt(0));
-            setIncomingChars(resetWords.substr(1));
-            setStartTime();
-            setWordCount();
-            setWpm(0);
-            setAccuracy(0);
-            setTypedChars('');
-            setCountdownTime(60);
-            setTimeLeft(seconds);
-            setTimerOn(false);
-        }
-
-        useEffect(() => {
-            if (trigger) {
-                setTimerOn(true);
-            }
-        }, [trigger]);
-
-        // useEffect runs after every render
-        // Same as componentDidUpdate in class components
-        useEffect(() => {
-            // Exit when timeLeft is 0
-            if (!timeLeft) return;
-
-            if (timerOn) {
-                // Generate a new intervalId for each re-render
-                const intervalId = setInterval(() => {
-                    setTimeLeft(timeLeft - 1);
-                }, 1000);
-
-                // Clear interval on re-render to avoid memory leaks
-                // See: https://reactjs.org/docs/hooks-reference.html#cleaning-up-an-effect
-                return () => clearInterval(intervalId);
-                // Add timeLeft as a dependecy to re-run the effect when we update it
-            }
-        }, [timeLeft, timerOn]);
-
-        return ([displayTime.m, displayTime.s]);
-    };
-
-    const [m, s] = CountdownTimer(typedChars, countdownTime);
-
+    const countdownTime = useSelector(state => state.countdownReducer);
+    const displayTime = secondsToTime(countdownTime);
+    CountdownTimer(typedChars, countdownTime);
+    
     return(
         useKeyPress((key) => {
 
@@ -142,10 +97,10 @@ const TypingBox = () => {
                 </span>
             </p>
             <h3>
-                {m}:{s}
-                {/*<Button variant="outline-dark" onClick={() => resetTimer()}>
+                {displayTime.m}:{displayTime.s}
+                <Button variant="outline-dark" onClick={() => dispatch({ type: 'RESET_TIMER'})}>
                     <FaRedoAlt/>
-                </Button>*/}
+                </Button>
             </h3>
             <h3>
                 WPM: {wpm} | ACC: {accuracy}%
