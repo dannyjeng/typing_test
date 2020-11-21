@@ -1,7 +1,7 @@
 import initialState from './initialState';
 import { RESET_TIMER } from '../actions/actionTypes';
 
-const eventReducer = (state = initialState, action) => {
+const resetTimerReducer = (state = initialState, action) => {
     switch (action.type) {
         case RESET_TIMER:
             console.log(state)
@@ -12,4 +12,4 @@ const eventReducer = (state = initialState, action) => {
     }
 }
 
-export default eventReducer
+export default resetTimerReducer
