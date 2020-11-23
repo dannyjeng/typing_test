@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import generate from './words';
 import useKeyPress from './useKeyPress';
 import { currentTime } from '../utils/time';
@@ -13,7 +13,7 @@ import './typing_box.css';
 
 // Tutorial taken from:
 // https://medium.com/better-programming/create-a-typing-game-with-react-hooks-usekeypress-and-faker-28bbc7919820 
-// TODO: Add timer, limit words to 4 letter, 5 letter, etc., track top results in a database
+// TODO: User select time (30sec, 30sec, 30sec, 1 min, 2 min, 5 min, etc), limit words to 4 letter, 5 letter, etc., track top results in a database
 
 const initialWords = generate();
 
@@ -35,12 +35,16 @@ const TypingBox = () => {
     const [accuracy, setAccuracy] = useState(0);
     const [typedChars, setTypedChars] = useState('');
 
-    //const [countdownTime, setCountdownTime] = useState(60);
-
     const countdownTime = useSelector(state => state.countdownReducer);
     const displayTime = secondsToTime(countdownTime);
     CountdownTimer(typedChars, countdownTime);
-    
+
+    const ResetTimer = () => {
+        setTypedChars('');
+        dispatch({ type: 'RESET_TIMER' });
+        console.log(typedChars);
+    }
+
     return(
         useKeyPress((key) => {
 
@@ -98,7 +102,7 @@ const TypingBox = () => {
             </p>
             <h3>
                 {displayTime.m}:{displayTime.s}
-                <Button variant="outline-dark" onClick={() => dispatch({ type: 'RESET_TIMER'})}>
+                <Button variant="outline-dark" onClick={() => ResetTimer}>
                     <FaRedoAlt/>
                 </Button>
             </h3>
