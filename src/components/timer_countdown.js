@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import secondsToTime from './convert_seconds_to_time';
-
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 /*
@@ -25,6 +23,8 @@ const CountdownTimer = (trigger, seconds) => {
     useEffect(() => {
         if (trigger) {
             setTimerOn(true);
+        } else {
+            setTimerOn(false);
         }
     }, [trigger]);
 
@@ -46,7 +46,7 @@ const CountdownTimer = (trigger, seconds) => {
             return () => clearInterval(intervalId);
             // Add timeLeft as a dependecy to re-run the effect when we update it
         }
-    }, [timerOn]);
+    }, [timerOn, dispatch]);
 };
 
 export default CountdownTimer;

@@ -15,7 +15,7 @@ import './typing_box.css';
 // https://medium.com/better-programming/create-a-typing-game-with-react-hooks-usekeypress-and-faker-28bbc7919820 
 // TODO: User select time (30sec, 30sec, 30sec, 1 min, 2 min, 5 min, etc), limit words to 4 letter, 5 letter, etc., track top results in a database
 
-const initialWords = generate();
+let initialWords = generate();
 
 const TypingBox = () => {
     const dispatch = useDispatch();
@@ -39,10 +39,27 @@ const TypingBox = () => {
     const displayTime = secondsToTime(countdownTime);
     CountdownTimer(typedChars, countdownTime);
 
-    const ResetTimer = () => {
-        setTypedChars('');
+    const reset = () => {
+        initialWords = generate();
         dispatch({ type: 'RESET_TIMER' });
-        console.log(typedChars);
+        setLeftPadding(new Array(20).fill(' ').join(''));
+        setOutgoingChars('');
+        setCurrentChar(initialWords.charAt(0));
+        setIncomingChars(initialWords.substr(1));
+        setStartTime();
+        setWordCount(0);
+        setWpm(0);
+        setAccuracy(0);
+        setTypedChars('');
+    }
+
+    const handleOnClick = (e) => {
+        // Returns 1 if mouse clicked, and returns 0 if triggered by pressing "space" or "enter".
+        // This prevents "space" from calling reset() accidentally after already clicking the reset button once.
+        // Useful because the button stays in focus after the first click, so hitting "space" would call reset() again.
+        if (e.detail) {
+            reset();
+        }
     }
 
     return(
@@ -76,7 +93,7 @@ const TypingBox = () => {
                 if (incomingChars.charAt(0) === ' ') {
                     setWordCount(wordCount + 1)
                     const durationInMinutes = (currentTime() - startTime) / 60000.0; // currentTime() returns in milliseconds
-                    setWpm(((wordCount + 1) / durationInMinutes).toFixed(2)); // Without +1, wpm is 0 after first word. Didn't update wordCount?
+                    setWpm(((wordCount + 1) / durationInMinutes)); // Without +1, wpm is 0 after first word. Didn't update wordCount?
                 }
             };
 
@@ -84,7 +101,7 @@ const TypingBox = () => {
             const updatedTypedChars = typedChars + key; // Storing all typed keys in a string
             setTypedChars(updatedTypedChars);
             setAccuracy(
-                (100 * (updatedOutgoingChars.length) / updatedTypedChars.length).toFixed(2)
+                (100 * (updatedOutgoingChars.length) / updatedTypedChars.length)
             );
         }),
 
@@ -102,12 +119,12 @@ const TypingBox = () => {
             </p>
             <h3>
                 {displayTime.m}:{displayTime.s}
-                <Button variant="outline-dark" onClick={() => ResetTimer}>
+                <Button variant="outline-dark" onClick={(e) => handleOnClick(e)}>
                     <FaRedoAlt/>
                 </Button>
             </h3>
             <h3>
-                WPM: {wpm} | ACC: {accuracy}%
+                WPM: {(wpm).toFixed(2)} | ACC: {(accuracy).toFixed(2)}%
             </h3>
         </div>
     );
