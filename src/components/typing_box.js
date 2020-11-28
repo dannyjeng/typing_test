@@ -105,27 +105,32 @@ const TypingBox = () => {
             );
         }),
 
-        <div className='mainBody'>
-            <p className='Character'>
-                <span className='Character-out'>
-                    {(leftPadding + outgoingChars).slice(-20)}
-                </span>
-                <span className='Character-current'>
-                    {currentChar}
-                </span>
-                <span>
-                    {incomingChars.substr(0, 20)}
-                </span>
-            </p>
-            <h3>
+        <div className='main'>
+            <div className='timer'>
                 {displayTime.m}:{displayTime.s}
-                <Button variant="outline-dark" onClick={(e) => handleOnClick(e)}>
-                    <FaRedoAlt/>
-                </Button>
-            </h3>
-            <h3>
-                WPM: {(wpm).toFixed(2)} | ACC: {(accuracy).toFixed(2)}%
-            </h3>
+            </div>
+            <div className='textBody'>
+                <h1 className='Character'>
+                    <span className='Character-out'>
+                        {(leftPadding + outgoingChars).slice(-20)}
+                    </span>
+                    <span className='Character-current'>
+                        {currentChar}
+                    </span>
+                    <span>
+                        {incomingChars.substr(0, 20)}
+                    </span>
+                </h1>
+            </div>
+            <Button variant="outline-dark" onClick={(e) => handleOnClick(e)}>
+                <FaRedoAlt/>
+            </Button>
+            <div className='wpm'>
+                WPM: {(wpm).toFixed(2)}
+            </div>
+            <div className='acc'>
+                ACC: {(accuracy).toFixed(2)}%
+            </div>
         </div>
     );
 }
