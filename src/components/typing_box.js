@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
 import generate from './words';
 import useKeyPress from './useKeyPress';
 import { currentTime } from '../utils/time';
@@ -125,12 +126,24 @@ const TypingBox = () => {
             <Button variant="outline-dark" onClick={(e) => handleOnClick(e)}>
                 <FaRedoAlt/>
             </Button>
-            <div className='wpm'>
-                WPM: {(wpm).toFixed(2)}
-            </div>
-            <div className='acc'>
-                ACC: {(accuracy).toFixed(2)}%
-            </div>
+            <Container>
+                <Row>
+                    <Col className='headCol' md='6'>
+                        words per min:
+                    </Col>
+                    <Col className='valCol' md='1'>
+                        {(wpm).toFixed(2)}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col className='headCol' md='6'>
+                        accuracy (%):
+                    </Col>
+                    <Col className='valCol' md='1'>
+                        {(accuracy).toFixed(2)}
+                    </Col>
+                </Row>
+            </Container>
         </div>
     );
 }

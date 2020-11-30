@@ -28,6 +28,7 @@
     transform: translate(-50%, -50%);
     text-align: center;
     font-size: 6em;
+    font-family: monospace;
 }
 
 .btn {
@@ -37,4 +38,22 @@
     margin-right: -50%;
     transform: translate(-50%, -50%);
     border: none !important;
+}
+
+.container {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    //text-align: right;
+    font-family: monospace;
+}
+
+.headCol {
+    text-align: right;
+}
+
+.valCol {
+    text-align: right;
 }
