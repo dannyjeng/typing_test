@@ -94,7 +94,7 @@ const TypingBox = () => {
                 if (incomingChars.charAt(0) === ' ') {
                     setWordCount(wordCount + 1)
                     const durationInMinutes = (currentTime() - startTime) / 60000.0; // currentTime() returns in milliseconds
-                    setWpm(((wordCount + 1) / durationInMinutes)); // Without +1, wpm is 0 after first word. Didn't update wordCount?
+                    setWpm(((wordCount + 1) / durationInMinutes)); // without +1, wpm is 0 after first word. wordCount not updated until after
                 }
             };
 
